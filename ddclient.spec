@@ -3,11 +3,12 @@
 Summary: A client to update host entries on DynDNS like services
 Name: ddclient
 Version: 3.7.1
-Release: %mkrel 2
+Release: %mkrel 3
 License: GPL
 Group: System/Configuration/Networking
 URL: http://ddclient.sourceforge.net/
 Source0: http://prdownloads.sourceforge.net/ddclient/%name-%version.tar.bz2
+Requires: perl(IO::Socket::SSL)
 BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
 
