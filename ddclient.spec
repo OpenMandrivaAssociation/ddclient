@@ -3,12 +3,16 @@
 Summary:	A client to update host entries on DynDNS like services
 Name:		ddclient
 Version:	3.8.0
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	GPL
 Group:		System/Configuration/Networking
 URL:		http://ddclient.sourceforge.net/
 Source0:	http://prdownloads.sourceforge.net/ddclient/%name-%version.tar.bz2
+# (fc) 3.8.0-2mdv add LSB header
+Patch0:		ddclient-3.8.0-lsb.patch
 Requires:	perl(IO::Socket::SSL)
+Requires(post): rpm-helper
+Requires(preun): rpm-helper
 BuildArch:	noarch
 BuildRoot:	%{_tmppath}/%{name}-%{version}-buildroot
 
@@ -33,6 +37,7 @@ information.
 
 %prep
 %setup -q
+%patch0 -p1 -b .lsb
 
 %build
 
@@ -52,13 +57,11 @@ install -p sample-etc_rc.d_init.d_ddclient.redhat %{buildroot}%{_initddir}/ddcli
 rm -rf %{buildroot}
 
 %post
-/sbin/chkconfig --add ddclient
+%_post_service privoxy
 
 %preun
-if [ $1 = 0 ]; then
-        /sbin/service ddclient stop > /dev/null 2>&1
-        /sbin/chkconfig --del ddclient
-fi
+%_preun_service privoxy
+
 
 %files
 %defattr(-,root,root)
