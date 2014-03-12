@@ -83,7 +83,7 @@ fi
 %_postun_userdel %{name}
 
 %files
-%doc sample* README* COPYRIGHT COPYING
+%doc sample* README* COPYRIGHT
 %{_sbindir}/ddclient
 %{_unitdir}/%{name}.service
 %{_tmpfilesdir}/%{name}.conf
