@@ -2,13 +2,19 @@ Summary:	A client to update host entries on DynDNS like services
 Name:		ddclient
 Version:	3.8.2
 Release:	1
-License:	GPL
+License:	GPLv2+
 Group:		System/Configuration/Networking
 URL:		http://ddclient.sourceforge.net/
 Source0:	http://prdownloads.sourceforge.net/ddclient/%{name}-%{version}.tar.bz2
-Requires:	perl(IO::Socket::SSL)
-Requires(post): rpm-helper
-Requires(preun):rpm-helper
+Patch0:		ddclient-3.8.2-paths.patch
+Source1:	ddclient.rwtab
+Source2:	ddclient.service
+Source3:	ddclient.sysconfig
+Source4:	ddclient.NetworkManager
+Source5:	ddclient-tmpfiles.conf
+Requires:	perl(Digest::SHA1) perl(IO::Socket::SSL)
+Requires(pre): rpm-helper
+Requires(postun):rpm-helper
 BuildArch:	noarch
 
 %description
@@ -32,29 +38,58 @@ information.
 
 %prep
 %setup -q
+%patch0 -p1 -b .pidpath~
+# Correct permissions for later usage in %doc
+chmod 644 sample-*
 
 %build
 
 %install
-mkdir -p %{buildroot}{%{_sbindir},%{_sysconfdir}/%{name},%{_initddir}}
-mkdir -p %{buildroot}/var/cache/ddclient
+install -p -m755 %{name} -D %{buildroot}%{_sbindir}/%{name}
+install -p -m600 sample-etc_ddclient.conf -D %{buildroot}%{_sysconfdir}/%{name}.conf
+install -p -m644 %{SOURCE1} -D %{buildroot}%{_sysconfdir}/rwtab.d/%{name}
+install -p -m644 %{SOURCE2} -D %{buildroot}%{_unitdir}/%{name}.service
+install -p -m644 %{SOURCE5} -D %{buildroot}%{_tmpfilesdir}/%{name}.conf
+install -p -m644 %{SOURCE3} -D %{buildroot}%{_sysconfdir}/sysconfig/%{name}
+install -p -m755 %{SOURCE4} -D %{buildroot}%{_sysconfdir}/NetworkManager/dispatcher.d/50-%{name}
+mkdir -p %{buildroot}%{_localstatedir}/{cache,run}/%{name}
+touch %{buildroot}%{_localstatedir}/cache/%{name}/%{name}.cache
+touch %{buildroot}%{_localstatedir}/run/%{name}/%{name}.pid
 
-install -p ddclient %{buildroot}%{_sbindir}
-install -p sample-etc_ddclient.conf %{buildroot}%{_sysconfdir}/%{name}/ddclient.conf
-touch %{buildroot}%{_sysconfdir}/%{name}/ddclient.cache
-install -p sample-etc_rc.d_init.d_ddclient.redhat %{buildroot}%{_initddir}/ddclient
+%triggerprein -- %{name} < 3.8.2
+if [ -d %{_sysconfdir}/%{name} ]; then
+    %_pre_useradd %{name} %{_localstatedir}/cache/%{name} /bin/nologin
+    if [ -e %{_sysconfdir}/%{name}/%{name}.conf ]; then
+	mv %{_sysconfdir}/%{name}/%{name}.conf %{_sysconfdir}/%{name}.conf
+	chown root:%{name} %{_sysconfdir}/%{name}.conf
+	chmod 640 %{_sysconfdir}/%{name}.conf
+    fi
+    if [ -e %{_sysconfdir}/%{name}/%{name}.cache ]; then
+	install -m600 -o %{name} -g %{name} -d %{buildroot}%{_localstatedir}/cache/%{name}
+	mv %{_sysconfdir}/%{name}/%{name}.cache %{_localstatedir}/cache/%{name}/%{name}.cache
+	chown %{name}:%{name}%{_localstatedir}/cache/%{name}/%{name}.cache
+	chmod 600 %{_localstatedir}/cache/%{name}/%{name}.cache
 
+    fi
+    rmdir --ignore-fail-on-non-empty %{_sysconfdir}/%{name}
+fi
 
-%post
-%_post_service privoxy
+%pre
+%_pre_useradd %{name} %{_localstatedir}/cache/%{name} /bin/nologin
 
-%preun
-%_preun_service privoxy
+%postun
+%_postun_userdel %{name}
 
 %files
 %doc sample* README* COPYRIGHT COPYING
 %{_sbindir}/ddclient
-%attr(600,root,root) %config(noreplace) %{_sysconfdir}/%{name}/ddclient.conf
-%config(noreplace) %ghost %{_sysconfdir}/%{name}/ddclient.cache
-%{_initddir}/ddclient
-%dir /var/cache/ddclient
+%{_unitdir}/%{name}.service
+%{_tmpfilesdir}/%{name}.conf
+%{_sysconfdir}/NetworkManager/dispatcher.d/50-%{name}
+%attr(640,root,%{name}) %config(noreplace) %{_sysconfdir}/%{name}.conf
+%config(noreplace) %{_sysconfdir}/rwtab.d/%{name}
+%config(noreplace) %{_sysconfdir}/sysconfig/%{name}
+%attr(700,%{name},%{name}) %dir %{_localstatedir}/cache/%{name}/
+%attr(600,%{name},%{name}) %ghost %{_localstatedir}/cache/%{name}/%{name}.cache
+%attr(755, %{name}, %{name}) %dir %{_localstatedir}/run/%{name}
+%ghost %{_localstatedir}/run/%{name}/%{name}.pid
