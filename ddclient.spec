@@ -7,6 +7,7 @@ Group:		System/Configuration/Networking
 URL:		http://ddclient.sourceforge.net/
 Source0:	http://prdownloads.sourceforge.net/ddclient/%{name}-%{version}.tar.bz2
 Patch0:		ddclient-3.8.2-paths.patch
+Patch1:		ddclient-3.8.2-be-satisfied-with-group-read-access-for-config.patch
 Source1:	ddclient.rwtab
 Source2:	ddclient.service
 Source3:	ddclient.sysconfig
@@ -39,6 +40,7 @@ information.
 %prep
 %setup -q
 %patch0 -p1 -b .pidpath~
+%patch1 -p1 -b .grpaccess~
 # Correct permissions for later usage in %doc
 chmod 644 sample-*
 

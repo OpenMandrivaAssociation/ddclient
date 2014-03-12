@@ -1,0 +1,11 @@
+--- ddclient-3.8.2/ddclient~	2014-03-12 20:35:38.479517979 +0100
++++ ddclient-3.8.2/ddclient	2014-03-12 20:35:39.399517989 +0100
+@@ -999,7 +999,7 @@ sub _read_config {
+     }
+     # Check for only owner has any access to config file
+     my ($dev, $ino, $mode, @statrest) = stat(FD);
+-    if ($mode & 077) {                          
++    if ($mode & 037) {                          
+ 	if (-f FD && (chmod 0600, $file)) {
+ 	    warning("file $file must be accessible only by its owner (fixed).");
+ 	} else {
