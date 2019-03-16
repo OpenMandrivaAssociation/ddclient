@@ -1,7 +1,7 @@
 Summary:	A client to update host entries on DynDNS like services
 Name:		ddclient
-Version:	3.8.2
-Release:	2
+Version:	3.8.3
+Release:	1
 License:	GPLv2+
 Group:		System/Configuration/Networking
 URL:		http://ddclient.sourceforge.net/
@@ -75,6 +75,9 @@ if [ -d %{_sysconfdir}/%{name} ]; then
     fi
     rmdir --ignore-fail-on-non-empty %{_sysconfdir}/%{name}
 fi
+
+%triggerpostun -- %{name} < %{EVRD}
+rm -f %{_localstatedir}/cache/%{name}/*
 
 %pre
 %_pre_useradd %{name} %{_localstatedir}/cache/%{name} /bin/nologin
