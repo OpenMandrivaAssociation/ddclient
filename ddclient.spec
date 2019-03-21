@@ -1,7 +1,7 @@
 Summary:	A client to update host entries on DynDNS like services
 Name:		ddclient
 Version:	3.8.3
-Release:	1
+Release:	2
 License:	GPLv2+
 Group:		System/Configuration/Networking
 URL:		http://ddclient.sourceforge.net/
@@ -13,6 +13,7 @@ Source2:	ddclient.service
 Source3:	ddclient.sysconfig
 Source4:	ddclient.NetworkManager
 Source5:	ddclient-tmpfiles.conf
+BuildRequires:	rpm-helper
 Requires:	perl(Digest::SHA1) perl(IO::Socket::SSL)
 Requires(pre): rpm-helper
 Requires(postun):rpm-helper
