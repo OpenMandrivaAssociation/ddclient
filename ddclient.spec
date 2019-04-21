@@ -1,11 +1,11 @@
 Summary:	A client to update host entries on DynDNS like services
 Name:		ddclient
-Version:	3.8.3
-Release:	2
+Version:	3.9.0
+Release:	1
 License:	GPLv2+
 Group:		System/Configuration/Networking
 URL:		http://ddclient.sourceforge.net/
-Source0:	http://prdownloads.sourceforge.net/ddclient/%{name}-%{version}.tar.bz2
+Source0:	http://prdownloads.sourceforge.net/ddclient/%{name}-%{version}.tar.gz
 Patch0:		ddclient-3.8.2-paths.patch
 Patch1:		ddclient-3.8.2-be-satisfied-with-group-read-access-for-config.patch
 Source1:	ddclient.rwtab
