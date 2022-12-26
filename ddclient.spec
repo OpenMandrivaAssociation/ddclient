@@ -1,3 +1,6 @@
+# fix automatic requires
+%global __requires_exclude ^perl[(](a)[)]
+
 Summary:	A client to update host entries on DynDNS like services
 Name:		ddclient
 Version:	3.10.0
@@ -17,13 +20,13 @@ Patch1:		ddclient-3.10.0-be-satisfied-with-group-read-access-for-config.patch
 
 BuildRequires:	rpm-helper
 
-Requires:	perl(Digest::SHA1) perl(IO::Socket::SSL)
+Requires:	perl(Digest::SHA1)
+Requires:	perl(IO::Socket::SSL)
 
 Requires(pre):	rpm-helper
 Requires(postun):rpm-helper
 
 BuildArch:	noarch
-
 
 %files
 %doc sample* README* COPYRIGHT
@@ -63,8 +66,11 @@ information.
 %prep
 %autosetup -p1
 
+# remove executables
+find . -name \*exe -delete
+
 # Correct permissions for later usage in %doc
-#chmod 644 sample-*
+chmod 644 sample-*
 
 %build
 %configure \
