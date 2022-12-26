@@ -12,8 +12,8 @@ Source2:	ddclient.service
 Source3:	ddclient.sysconfig
 Source4:	ddclient.NetworkManager
 Source5:	ddclient-tmpfiles.conf
-Patch0:		ddclient-3.8.2-paths.patch
-Patch1:		ddclient-3.8.2-be-satisfied-with-group-read-access-for-config.patch
+Patch0:		ddclient-3.10.0-paths.patch
+Patch1:		ddclient-3.10.0-be-satisfied-with-group-read-access-for-config.patch
 
 BuildRequires:	rpm-helper
 
@@ -64,7 +64,7 @@ information.
 %autosetup -p1
 
 # Correct permissions for later usage in %doc
-chmod 644 sample-*
+#chmod 644 sample-*
 
 %build
 %configure \
