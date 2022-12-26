@@ -1,0 +1,12 @@
+--- a/ddclient.in
++++ b/ddclient.in
+@@ -999,7 +999,7 @@ sub _read_config {
+     # Otherwise, require that it isn't writable when not owned by us. For example allow it to
+     # be owned by root:ddclient with mode 640. Always ensure that it is not accessible to others.
+     my ($dev, $ino, $mode, @statrest) = stat(FD);
+-    if ($mode & 077 && -o FD) {
++    if ($mode & 037 && -o FD) {
+         if (-f FD && (chmod 0600, $file)) {
+             warning("file $file must be accessible only by its owner (fixed).");
+         }
+

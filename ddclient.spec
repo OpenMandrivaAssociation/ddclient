@@ -1,23 +1,45 @@
 Summary:	A client to update host entries on DynDNS like services
 Name:		ddclient
-Version:	3.9.1
-Release:	2
+Version:	3.10.0
+Release:	1
 License:	GPLv2+
 Group:		System/Configuration/Networking
-URL:		http://ddclient.sourceforge.net/
-Source0:	http://prdownloads.sourceforge.net/ddclient/%{name}-%{version}.tar.gz
-Patch0:		ddclient-3.8.2-paths.patch
-Patch1:		ddclient-3.8.2-be-satisfied-with-group-read-access-for-config.patch
+URL:		https://ddclient.net
+#Source0:	https://downloads.sourceforge.net/ddclient/%{name}-%{version}.tar.gz
+Source0:	https://github.com/ddclient/ddclient/archive/v%{version}/%{name}-%{version}.tar.gz
 Source1:	ddclient.rwtab
 Source2:	ddclient.service
 Source3:	ddclient.sysconfig
 Source4:	ddclient.NetworkManager
 Source5:	ddclient-tmpfiles.conf
+Patch0:		ddclient-3.8.2-paths.patch
+Patch1:		ddclient-3.8.2-be-satisfied-with-group-read-access-for-config.patch
+
 BuildRequires:	rpm-helper
+
 Requires:	perl(Digest::SHA1) perl(IO::Socket::SSL)
-Requires(pre): rpm-helper
+
+Requires(pre):	rpm-helper
 Requires(postun):rpm-helper
+
 BuildArch:	noarch
+
+
+%files
+%doc sample* README* COPYRIGHT
+%{_bindir}/ddclient
+%{_unitdir}/%{name}.service
+%{_tmpfilesdir}/%{name}.conf
+%{_sysconfdir}/NetworkManager/dispatcher.d/50-%{name}
+%attr(640,root,%{name}) %config(noreplace) %{_sysconfdir}/%{name}.conf
+%config(noreplace) %{_sysconfdir}/rwtab.d/%{name}
+%config(noreplace) %{_sysconfdir}/sysconfig/%{name}
+%attr(700,%{name},%{name}) %dir %{_localstatedir}/cache/%{name}/
+%attr(600,%{name},%{name}) %ghost %{_localstatedir}/cache/%{name}/%{name}.cache
+%attr(755, %{name}, %{name}) %dir %{_localstatedir}/run/%{name}
+%ghost %{_localstatedir}/run/%{name}/%{name}.pid
+
+#---------------------------------------------------------------------------
 
 %description
 DDclient is a small full featured client requiring only Perl and no
@@ -39,17 +61,23 @@ scripts for use with DHCP, PPP, and cron. See the README for more
 information.
 
 %prep
-%setup -q
-%patch0 -p1 -b .pidpath~
-%patch1 -p1 -b .grpaccess~
+%autosetup -p1
+
 # Correct permissions for later usage in %doc
 chmod 644 sample-*
 
 %build
+%configure \
+         --prefix=%{_prefix} \
+         --sysconfdir=%{_sysconfdir} \
+         --localstatedir=/var
+%make_build
 
 %install
-install -p -m755 %{name} -D %{buildroot}%{_sbindir}/%{name}
-install -p -m600 sample-etc_ddclient.conf -D %{buildroot}%{_sysconfdir}/%{name}.conf
+%make_install
+
+##install -p -m755 %{name} -D %{buildroot}%{_sbindir}/%{name}
+##install -p -m600 sample-etc_ddclient.conf -D %{buildroot}%{_sysconfdir}/%{name}.conf
 install -p -m644 %{SOURCE1} -D %{buildroot}%{_sysconfdir}/rwtab.d/%{name}
 install -p -m644 %{SOURCE2} -D %{buildroot}%{_unitdir}/%{name}.service
 install -p -m644 %{SOURCE5} -D %{buildroot}%{_tmpfilesdir}/%{name}.conf
@@ -86,16 +114,3 @@ rm -f %{_localstatedir}/cache/%{name}/*
 %postun
 %_postun_userdel %{name}
 
-%files
-%doc sample* README* COPYRIGHT
-%{_sbindir}/ddclient
-%{_unitdir}/%{name}.service
-%{_tmpfilesdir}/%{name}.conf
-%{_sysconfdir}/NetworkManager/dispatcher.d/50-%{name}
-%attr(640,root,%{name}) %config(noreplace) %{_sysconfdir}/%{name}.conf
-%config(noreplace) %{_sysconfdir}/rwtab.d/%{name}
-%config(noreplace) %{_sysconfdir}/sysconfig/%{name}
-%attr(700,%{name},%{name}) %dir %{_localstatedir}/cache/%{name}/
-%attr(600,%{name},%{name}) %ghost %{_localstatedir}/cache/%{name}/%{name}.cache
-%attr(755, %{name}, %{name}) %dir %{_localstatedir}/run/%{name}
-%ghost %{_localstatedir}/run/%{name}/%{name}.pid
