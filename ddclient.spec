@@ -3,7 +3,7 @@
 
 Summary:	A client to update host entries on DynDNS like services
 Name:		ddclient
-Version:	3.10.0
+Version:	3.11.1
 Release:	1
 License:	GPLv2+
 Group:		System/Configuration/Networking
