@@ -18,8 +18,8 @@ Source5:	ddclient-tmpfiles.conf
 Patch0:		ddclient-3.10.0-paths.patch
 Patch1:		ddclient-3.10.0-be-satisfied-with-group-read-access-for-config.patch
 
+BuildRequires:	curl
 BuildRequires:	rpm-helper
-BuildRequires: cmake(curl)
 
 Requires:	perl(Digest::SHA1)
 Requires:	perl(IO::Socket::SSL)
