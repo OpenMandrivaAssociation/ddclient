@@ -1,5 +1,5 @@
 # fix automatic requires
-%global __requires_exclude ^perl[(](a)[)]
+%global __requires_exclude  ^perl(.*)$
 
 Summary:	A client to update host entries on DynDNS like services
 Name:		ddclient
@@ -10,19 +10,26 @@ Group:		System/Configuration/Networking
 URL:		https://ddclient.net
 #Source0:	https://downloads.sourceforge.net/ddclient/%{name}-%{version}.tar.gz
 Source0:	https://github.com/ddclient/ddclient/archive/v%{version}/%{name}-%{version}.tar.gz
-Source1:	ddclient.rwtab
-Source2:	ddclient.service
-Source3:	ddclient.sysconfig
-Source4:	ddclient.NetworkManager
-Source5:	ddclient-tmpfiles.conf
+Source1:	%{name}.rwtab
+Source2:	%{name}.service
+Source3:	%{name}.sysconfig
+Source4:	%{name}.NetworkManager
+Source5:	%{name}-tmpfiles.conf
+Source6:	%{name}.sysusers
 Patch0:		ddclient-4.0.0-paths.patch
 Patch1:		ddclient-4.0.0-be-satisfied-with-group-read-access-for-config.patch
 
 BuildRequires:	curl
 BuildRequires:	rpm-helper
+BuildRequires:	perl-generators
+BuildRequires:	perl(Sys::Hostname)
+BuildRequires:	perl(version)
 
+#Requires:	perl(Data::Validate::IP)
 Requires:	perl(Digest::SHA1)
+#Requires:	perl(IO::Socket::INET6)
 Requires:	perl(IO::Socket::SSL)
+#Requires:	perl(JSON::PP)
 
 Requires(pre):	rpm-helper
 Requires(postun):rpm-helper
@@ -35,6 +42,7 @@ BuildArch:	noarch
 %{_unitdir}/%{name}.service
 %{_tmpfilesdir}/%{name}.conf
 %{_sysconfdir}/NetworkManager/dispatcher.d/50-%{name}
+%{_sysusersdir}/%{name}.conf
 %attr(640,root,%{name}) %config(noreplace) %{_sysconfdir}/%{name}.conf
 %config(noreplace) %{_sysconfdir}/rwtab.d/%{name}
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
@@ -95,14 +103,11 @@ mkdir -p %{buildroot}%{_localstatedir}/{cache,run}/%{name}
 touch %{buildroot}%{_localstatedir}/cache/%{name}/%{name}.cache
 touch %{buildroot}%{_localstatedir}/run/%{name}/%{name}.pid
 
+# add ddclient user
+install -D -pm 0644 %{SOURCE6} %{buildroot}%{_sysusersdir}/%{name}.conf
+
 %triggerprein -- %{name} < 3.8.2
 if [ -d %{_sysconfdir}/%{name} ]; then
-    %_pre_useradd %{name} %{_localstatedir}/cache/%{name} /bin/nologin
-    if [ -e %{_sysconfdir}/%{name}/%{name}.conf ]; then
-	mv %{_sysconfdir}/%{name}/%{name}.conf %{_sysconfdir}/%{name}.conf
-	chown root:%{name} %{_sysconfdir}/%{name}.conf
-	chmod 640 %{_sysconfdir}/%{name}.conf
-    fi
     if [ -e %{_sysconfdir}/%{name}/%{name}.cache ]; then
 	install -m600 -o %{name} -g %{name} -d %{buildroot}%{_localstatedir}/cache/%{name}
 	mv %{_sysconfdir}/%{name}/%{name}.cache %{_localstatedir}/cache/%{name}/%{name}.cache
@@ -111,14 +116,8 @@ if [ -d %{_sysconfdir}/%{name} ]; then
 
     fi
     rmdir --ignore-fail-on-non-empty %{_sysconfdir}/%{name}
-fi
+1fi
 
 %triggerpostun -- %{name} < %{EVRD}
 rm -f %{_localstatedir}/cache/%{name}/*
-
-%pre
-%_pre_useradd %{name} %{_localstatedir}/cache/%{name} /bin/nologin
-
-%postun
-%_postun_userdel %{name}
 
