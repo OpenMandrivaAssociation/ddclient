@@ -7,6 +7,6 @@
 -    if ($mode & 077 && -o FD) {
 +    if ($mode & 037 && -o FD) {
          if (-f FD && (chmod 0600, $file)) {
-             warning("file $file must be accessible only by its owner (fixed).");
-         }
+             warning("file must be accessible only by its owner (fixed)");
+         } else {
 

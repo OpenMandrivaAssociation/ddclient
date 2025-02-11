@@ -1,0 +1,12 @@
+--- a/ddclient.conf.in
++++ b/ddclient.conf.in
+@@ -22,7 +22,7 @@ daemon=300				# check every 300 seconds
+ # mail-from=root                # set the email "From:" header to "root".  If
+                                 # unset (the default) or empty, the from address
+                                 # depends on your system's default behavior.
+-pid=@runstatedir@/ddclient.pid  # record PID in file.
++pid=@runstatedir@/ddclient/ddclient.pid  # record PID in file.
+ # postscript=script             # run script after updating.  The new IP is
+                                 # added as argument.
+ #
+
