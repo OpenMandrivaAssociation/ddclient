@@ -19,6 +19,11 @@ Source6:	%{name}.sysusers
 Patch0:		ddclient-4.0.0-paths.patch
 Patch1:		ddclient-4.0.0-be-satisfied-with-group-read-access-for-config.patch
 
+BuildRequires:	autoconf
+BuildRequires:	automake
+BuildRequires:	libtool-base
+BuildRequires:	slibtool
+BuildRequires:	make
 BuildRequires:	curl
 BuildRequires:	rpm-helper
 BuildRequires:	perl-generators
